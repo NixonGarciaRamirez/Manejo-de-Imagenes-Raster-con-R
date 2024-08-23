@@ -60,6 +60,20 @@ r_agg <- aggregate(raster_file, fact=2, fun=mean)
 plot(r_agg)
 
 
+
+# Desagregación (Disaggregate)
+#Divide las celdas de un raster para aumentar su resolución.
+
+
+r_disagg <- disaggregate(raster_file, fact=2)
+plot(r_disagg)
+
+
+
+
+
+
 #### Exportacion de datos raster ####
 # Guardar el raster en un nuevo archivo
 writeRaster(r_agg, "D:/NIXON/MI MUNDO PROPIO/08 SIG/R CON GEE/libreria Raster/imagen_practica.tif", format="GTiff", overwrite=TRUE)
+
