@@ -68,8 +68,23 @@ plot(r_agg)
 r_disagg <- disaggregate(raster_file, fact=2)
 plot(r_disagg)
 
+#Focal : Aplica una función a una vecindad de celdas alrededor de cada celda en un raster.
+w <- matrix(1, nrow=3, ncol=3)
+r_focal <- focal(raster_file, w, fun=mean)
+plot(r_focal)
 
 
+# Máscara (Mask)
+# Aplica una máscara a un raster para establecer valores como NA 
+# (o un valor específico) en función de otro raster o shapefile.
+
+r2 <-  raster(nrows=100, ncols=100, xmn=0, xmx=100)
+values(r2) <- runif(ncell(r2), min=100, max=1000)
+plot(r2)
+
+
+r_mask <- mask(r2, r1, maskvalue = NA)
+plot(r_mask)
 
 
 
