@@ -98,6 +98,15 @@ plot(r_crop) #Es algo util ya que lo recortara en un cudrado perfecto, independi
 
 
 
+#  Reamostrar (Resample)
+# Reamuestra un raster para que tenga la misma resolución y alineación que otro raster.
+#Obviamente cuando se habla de resolucion , no se refiere a calidad en pixeles de la imagen
+#se refiere a que cambia la escala con la que se esta vizualizando
+#Por ejemplo, en esta linea de codigo, lo que se hara es que el recorte previamente realizado,
+#se pondra a la misma distancia que del archivo raster original
+r_resample <- resample( r_crop, raster_file, method='bilinear')
+plot(r_resample)
+
 
 
 #### Exportacion de datos raster ####
