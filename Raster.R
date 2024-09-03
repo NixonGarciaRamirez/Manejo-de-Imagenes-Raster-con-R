@@ -89,6 +89,16 @@ plot(r_mask)
 
 
 
+# Recortar (Crop)
+
+# A menudo, los datos raster se recortan y enmascaran en un solo paso para eliminar áreas no deseadas.
+
+r_crop <- crop(raster_file, shp)
+plot(r_crop) #Es algo util ya que lo recortara en un cudrado perfecto, independientemente si el shp tiene forma irregular
+
+
+
+
 
 #### Exportacion de datos raster ####
 # Guardar el raster en un nuevo archivo
