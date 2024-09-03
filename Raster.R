@@ -78,13 +78,15 @@ plot(r_focal)
 # Aplica una máscara a un raster para establecer valores como NA 
 # (o un valor específico) en función de otro raster o shapefile.
 
-r2 <-  raster(nrows=100, ncols=100, xmn=0, xmx=100)
-values(r2) <- runif(ncell(r2), min=100, max=1000)
-plot(r2)
+library(sf)
+shp_path <- "D:/NIXON/MI MUNDO PROPIO/08 SIG/R CON GEE/libreria Raster/Mask.shp"
+shp <- st_read(shp_path)
+plot(shp)
 
 
-r_mask <- mask(r2, r1, maskvalue = NA)
+r_mask <- mask(raster_file, shp) #Algo a resaltar es que al principio generaba error el codigo cuando yo ponia el parametro maskvalue = NA, lo mejor es dejarlo vasio ya que el parametro NA esta por defecto
 plot(r_mask)
+
 
 
 
