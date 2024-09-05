@@ -114,6 +114,15 @@ plot(r_mosaic)
 
 
 
+# Calculadora raster (Overlay): Aplica una función personalizada a los valores de varios raster.
+
+#Lo primero a resaltar es que las capas si o si deben estar superpuestas y deben tener exactamente la misma extencion
+#por ende si tu otro raster es ams grande lo ideal es que lo recortes primero
+r_overlay <- overlay(r1,r1, fun=function(x, y) {x/y})
+plot(r_overlay)
+
+
+
 
 #### Exportacion de datos raster ####
 # Guardar el raster en un nuevo archivo
