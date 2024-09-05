@@ -107,6 +107,12 @@ plot(r_crop) #Es algo util ya que lo recortara en un cudrado perfecto, independi
 r_resample <- resample( r_crop, raster_file, method='bilinear')
 plot(r_resample)
 
+# Mosaico (Mosaic): Combina varios raster en uno solo
+
+r_mosaic <- mosaic(r1, r2, fun=mean)
+plot(r_mosaic)
+
+
 
 
 #### Exportacion de datos raster ####
