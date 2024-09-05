@@ -11,6 +11,53 @@ Ejemplo:
 recorte <- crop(raster_file, shp)
 ```
 
+
+Algo a resaltar es que se puede utilizar un shapefile como extensión para recortar un raster con la función `crop()` de la librería `raster`. Cuando se usa un shapefile, se recorta el raster a la extensión espacial del shapefile, pero solo se considerará la extensión (el límite rectangular) del shapefile y no la geometría precisa. Para recortar un raster siguiendo exactamente la forma del shapefile, debes usar la función `mask()` después de `crop()`.
+
+Aquí te muestro cómo hacerlo:
+
+**Recortar usando un shapefile (solo extensión)**
+Primero, carga el shapefile y úsalo directamente en `crop()`:
+
+```r
+library(raster)
+library(rgdal)
+
+# Cargar el raster y el shapefile
+r <- raster("ruta/al/archivo_raster.tif")
+shape <- shapefile("ruta/al/shapefile.shp")
+
+# Recortar el raster usando la extensión del shapefile
+r_crop <- crop(r, shape)
+
+# Visualizar el raster recortado
+plot(r_crop)
+plot(shape, add=TRUE)
+```
+
+**Recortar y enmascarar (crop + mask) usando un shapefile**
+Para recortar el raster siguiendo la geometría exacta del shapefile:
+
+```r
+# Recortar el raster a la extensión del shapefile
+r_crop <- crop(r, shape)
+
+# Enmascarar el raster para que siga exactamente la forma del shapefile
+r_mask <- mask(r_crop, shape)
+
+# Visualizar el resultado
+plot(r_mask)
+plot(shape, add=TRUE)
+```
+
+### Explicación
+- **`crop()`**: Recorta el raster a la extensión espacial (rectángulo) del shapefile.
+- **`mask()`**: Aplica el shapefile como una máscara, asignando `NA` a todas las celdas fuera de la geometría del shapefile.
+
+Esto te permite trabajar con la porción del raster que se encuentra dentro de la forma exacta definida por el shapefile.
+
+
+
 ### 2. **Reclasificación (Reclassify)**
 
 Permite reasignar valores dentro de un raster en rangos específicos, cambiando los valores de una forma más controlada. Esto se hace mediante una matriz que define los rangos y sus nuevos valores.
@@ -20,6 +67,66 @@ Ejemplo:
 rcl_matrix <- matrix(c(0, 50, 1, 50, 100, 2), ncol=3, byrow=TRUE)
 reclass_raster <- reclassify(raster_file, rcl_matrix)
 ```
+
+¡Claro! La función `matrix()` en R se usa para crear matrices, y en el contexto de la reclasificación con la función `reclassify()` de la librería `raster`, define cómo se transformarán los valores originales del raster.
+
+### Descomposición del código:
+
+```r
+matrix(c(0, 50, 1, 50, 100, 2), ncol=3, byrow=TRUE)
+```
+
+- **`c(0, 50, 1, 50, 100, 2)`**: Este vector define los valores que se usarán para rellenar la matriz. En este caso, son seis números: `0`, `50`, `1`, `50`, `100`, y `2`.
+  
+- **`ncol=3`**: Indica que la matriz tendrá 3 columnas. Como se tienen 6 valores, esto resultará en una matriz de 2 filas y 3 columnas.
+
+- **`byrow=TRUE`**: Significa que los valores se llenarán por filas (en lugar de por columnas). Es decir, los primeros tres números irán en la primera fila y los siguientes tres en la segunda.
+
+### Resultado
+El código anterior crea la siguiente matriz:
+
+```
+     [,1] [,2] [,3]
+[1,]    0   50    1
+[2,]   50  100    2
+```
+
+### Interpretación en la reclasificación
+
+En la función `reclassify()`, esta matriz se usa para transformar los valores del raster de acuerdo con los rangos especificados:
+
+- **Columna 1 (`[,1]`)**: Define el límite inferior de cada rango.
+- **Columna 2 (`[,2]`)**: Define el límite superior de cada rango.
+- **Columna 3 (`[,3]`)**: Define el nuevo valor que se asignará a todas las celdas del raster cuyos valores originales caen dentro de los rangos especificados en las primeras dos columnas.
+
+#### En este ejemplo:
+1. **Rango de 0 a 50**:
+   - Todas las celdas del raster que tienen un valor entre 0 y 50 (incluyendo ambos) serán asignadas al valor `1`.
+2. **Rango de 50 a 100**:
+   - Todas las celdas con valores entre 50 y 100 (excluyendo 50) serán asignadas al valor `2`.
+
+#### Ejemplo con un raster
+Supongamos que tienes un raster con los siguientes valores:
+
+```
+  10  20  30
+  55  70  85
+  45  60  75
+```
+
+Después de aplicar la reclasificación usando la matriz anterior, los valores del raster se transformarían en:
+
+```
+  1  1  1
+  2  2  2
+  1  2  2
+```
+
+Esto significa que los valores originales de `10`, `20`, y `30` se transformaron en `1` porque estaban en el rango de `0-50`, y los valores de `55`, `70`, y `85` se transformaron en `2` porque estaban en el rango de `50-100`.
+
+### Resumen
+La matriz usada en la función `reclassify()` especifica cómo deben transformarse los valores del raster, basándose en los rangos de valores. Cada fila de la matriz define un rango de valores originales y el nuevo valor que se asignará a ese rango en el raster resultante.
+
 
 ### 3. **Resampleo (Resample)**
 
@@ -38,6 +145,71 @@ Ejemplo:
 ```r
 masked_raster <- mask(raster_file, shp)
 ```
+
+### Ejemplo:::
+### Imagina lo siguiente:
+
+Tienes un **raster** que representa una imagen satelital de un área geográfica amplia, y quieres analizar solo la parte del raster que corresponde a un parque natural. Para ello, tienes un **shapefile** que delimita el área del parque.
+
+### ¿Qué problema resuelve `mask()`?
+
+Si solo quieres trabajar con la parte del raster que está dentro del parque (por ejemplo, calcular la vegetación o analizar la topografía solo dentro del parque), necesitas "enmascarar" las partes del raster que están fuera de los límites del parque. Aquí es donde entra `mask()`.
+
+### Explicación con un ejemplo:
+
+1. **Raster original (imaginario):**
+
+   Supongamos que tienes un raster que muestra elevaciones de un terreno en una cuadrícula 5x5:
+
+   ```
+   100  110  120  130  140
+   90   100  110  120  130
+   80   90   100  110  120
+   70   80   90   100  110
+   60   70   80   90   100
+   ```
+
+2. **Shapefile del parque (imaginario):**
+
+   Ahora, imagina que tu parque natural cubre solo las celdas centrales del raster, delimitadas por este rectángulo:
+
+   ```
+   90   100  110  120  130
+   80   90  (100)(110)(120)
+   70   80  (90) (100)(110)
+   60   70   80   90   100
+   ```
+
+   Las celdas marcadas con paréntesis `( )` están dentro del parque.
+
+3. **Uso de `mask()`:**
+
+   Cuando aplicas `mask()` con el shapefile del parque, el raster resultante será:
+
+   ```
+   NA   NA   NA   NA   NA
+   NA   NA  100  110  120
+   NA   NA   90  100  110
+   NA   NA   NA   NA   NA
+   NA   NA   NA   NA   NA
+   ```
+
+   - **`NA`**: Indica celdas fuera de los límites del parque (enmascaradas).
+   - **Valores originales**: Solo permanecen las celdas dentro del parque.
+
+### ¿Para qué sirve `mask()`?
+
+1. **Focalizar análisis**: Si solo te interesa analizar o visualizar una parte específica del raster (en este caso, el área dentro del parque), `mask()` te permite aislar esa parte y trabajar únicamente con ella.
+
+2. **Eliminar datos irrelevantes**: Puedes eliminar datos de áreas que no te interesan o que podrían interferir en tu análisis.
+
+3. **Preparación de datos**: Es una herramienta crucial para preparar tus datos raster antes de realizar cálculos, modelados o visualizaciones centradas en áreas específicas.
+
+### Resumen
+La función `mask()` te ayuda a extraer solo la porción del raster que está dentro de una "máscara" definida (como un shapefile o un segundo raster), enmascarando todo lo demás (es decir, asignándole `NA` o valores específicos). Esto es útil cuando quieres centrarte en una región específica o eliminar datos irrelevantes de tu análisis.
+
+
+
 
 ### 5. **Calculadora Raster (Overlay)**
 
